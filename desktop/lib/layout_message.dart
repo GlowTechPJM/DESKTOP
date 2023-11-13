@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class LayoutMessage extends StatefulWidget {
   const LayoutMessage({Key? key}) : super(key: key);
@@ -8,23 +9,57 @@ class LayoutMessage extends StatefulWidget {
 }
 
 class LayoutMessageState extends State<LayoutMessage> {
+  List<String> messages = [];
+
+  TextEditingController messageController = TextEditingController();
+
+  void sendMessage() {
+    String messageText = messageController.text.trim();
+    if (messageText.isNotEmpty) {
+      String currentDate =
+          DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+      String formattedMessage = '$messageText - $currentDate';
+      setState(() {
+        messages.add(formattedMessage);
+        messages.sort((a, b) => b.compareTo(a));
+        messageController.clear();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(child: Text('Led panel connection')),
+        title: const Text('Message List'),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            const SizedBox(height: 0),
-            Image.asset(
-              'assets/images/logo.png',
-              width: 300,
-              height: 300,
+            TextField(
+              controller: messageController,
+              decoration: const InputDecoration(labelText: 'Enter Message'),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                sendMessage();
+              },
+              child: const Text('Send'),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(messages[index]),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),

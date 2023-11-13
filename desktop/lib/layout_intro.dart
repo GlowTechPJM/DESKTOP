@@ -12,7 +12,7 @@ enum ConnectionStatus {
 }
 
 class LayoutIntro extends StatefulWidget {
-  LayoutIntro({Key? key}) : super(key: key);
+  const LayoutIntro({Key? key}) : super(key: key);
 
   @override
   LayoutIntroState createState() => LayoutIntroState();
@@ -87,7 +87,6 @@ class LayoutIntroState extends State<LayoutIntro> {
   }
 
   void onConnectionComplete() {
-    // Navigate to the layout for successful connection
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const LayoutMessage()),
