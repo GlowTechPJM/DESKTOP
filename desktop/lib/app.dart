@@ -18,9 +18,9 @@ class AppState extends State<App> {
     // Farem servir la base 'Cupertino'
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LayoutIntro(),
+      home: const LayoutIntro(),
       routes: {
-        'intro': (context) => LayoutIntro(),
+        'intro': (context) => const LayoutIntro(),
         'message': (context) => const LayoutMessage(),
       },
     );

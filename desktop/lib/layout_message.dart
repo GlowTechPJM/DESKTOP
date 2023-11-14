@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'app_data.dart';
 
 class LayoutMessage extends StatefulWidget {
   const LayoutMessage({Key? key}) : super(key: key);
@@ -9,29 +10,20 @@ class LayoutMessage extends StatefulWidget {
 }
 
 class LayoutMessageState extends State<LayoutMessage> {
-  List<String> messages = [];
+  final AppData appData = AppData();
 
-  TextEditingController messageController = TextEditingController();
-
-  void sendMessage() {
-    String messageText = messageController.text.trim();
-    if (messageText.isNotEmpty) {
-      String currentDate =
-          DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
-      String formattedMessage = '$messageText - $currentDate';
-      setState(() {
-        messages.add(formattedMessage);
-        messages.sort((a, b) => b.compareTo(a));
-        messageController.clear();
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    appData.loadList();
   }
 
   @override
   Widget build(BuildContext context) {
+    AppData appData = Provider.of<AppData>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Message List'),
+        title: const Text('Message Sending'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -39,24 +31,34 @@ class LayoutMessageState extends State<LayoutMessage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             TextField(
-              controller: messageController,
+              controller: appData.messageController,
               decoration: const InputDecoration(labelText: 'Enter Message'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                sendMessage();
+                appData.sendMessage(appData.messageController.text.trim());
               },
               child: const Text('Send'),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: ListView.builder(
-                itemCount: messages.length,
+                itemCount: appData.messages.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(messages[index]),
+                    title: Text(appData.messages[index]),
                   );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.download_rounded),
+                onPressed: () {
+                  appData.downloadList();
                 },
               ),
             ),

@@ -1,15 +1,6 @@
-import 'dart:math';
-
-import 'package:desktop/layout_message.dart';
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/io.dart';
-
-enum ConnectionStatus {
-  disconnected,
-  disconnecting,
-  connecting,
-  connected,
-}
+import 'package:provider/provider.dart';
+import 'app_data.dart';
 
 class LayoutIntro extends StatefulWidget {
   const LayoutIntro({Key? key}) : super(key: key);
@@ -20,78 +11,7 @@ class LayoutIntro extends StatefulWidget {
 
 class LayoutIntroState extends State<LayoutIntro> {
   final TextEditingController ipController = TextEditingController();
-  ConnectionStatus connectionStatus = ConnectionStatus.disconnected;
   bool isLoading = false;
-  late IOWebSocketChannel socketClient;
-
-  Future<void> connectToServer(String ip, int port) async {
-    setState(() {
-      isLoading = true;
-      connectionStatus = ConnectionStatus.connecting;
-    });
-
-    await Future.delayed(const Duration(seconds: 4));
-
-    try {
-      socketClient = IOWebSocketChannel.connect("ws://$ip:$port");
-      setState(() {
-        connectionStatus = ConnectionStatus.connected;
-        isLoading = false;
-      });
-      if (connectionStatus == ConnectionStatus.connected) {
-        onConnectionComplete();
-      } else {
-        // ignore: use_build_context_synchronously
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Connection Error'),
-              content: const Text('Unable to connect to the server: $e'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } catch (e) {
-      setState(() {
-        connectionStatus = ConnectionStatus.disconnected;
-        isLoading = false;
-      });
-      // ignore: use_build_context_synchronously
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Connection Error'),
-            content: Text('Unable to connect to the server: $e'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
-  void onConnectionComplete() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const LayoutMessage()),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,36 +43,74 @@ class LayoutIntroState extends State<LayoutIntro> {
   }
 
   void connectionPopup(BuildContext context) {
+    AppData appData = Provider.of<AppData>(context);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Center(child: Text('Enter the IP of the controller:')),
-          content: TextField(
-            controller: ipController,
-            decoration: const InputDecoration(
-              hintText: 'Type IP here...',
+          content: SizedBox(
+            height: 100.0,
+            width: 120.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: ipController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type IP here...',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Close'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        showLoadingScreen(context);
+                        appData.connectToServer(ipController.text, 8080);
+
+                        Future.delayed(const Duration(seconds: 2), () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pushNamed('message');
+                          if (appData.connectionStatus ==
+                              ConnectionStatus.connected) {
+                            appData.onConnectionComplete(context);
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Connection Error'),
+                                  content: const Text(
+                                      'Unable to connect to the server.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        });
+                      },
+                      child: const Text('Submit'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-            TextButton(
-              onPressed: () {
-                showLoadingScreen(context);
-                connectToServer(ipController.text, 8080);
-                Future.delayed(const Duration(seconds: 4), () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('message');
-                });
-              },
-              child: const Text('Submit'),
-            ),
-          ],
         );
       },
     );
@@ -165,8 +123,12 @@ class LayoutIntroState extends State<LayoutIntro> {
       builder: (BuildContext context) {
         return const AlertDialog(
           title: Text('Loading...'),
-          content: Center(
-            child: CircularProgressIndicator(),
+          content: SizedBox(
+            height: 100.0,
+            width: 150.0,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
         );
       },
