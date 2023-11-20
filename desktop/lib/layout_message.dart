@@ -10,17 +10,16 @@ class LayoutMessage extends StatefulWidget {
 }
 
 class LayoutMessageState extends State<LayoutMessage> {
-  final AppData appData = AppData();
-
   @override
   void initState() {
     super.initState();
-    appData.loadList();
   }
 
   @override
   Widget build(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
+    appData.loadList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Message Sending'),
@@ -48,6 +47,11 @@ class LayoutMessageState extends State<LayoutMessage> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(appData.messages[index]),
+                    onTap: () {
+                      String message = appData.messages[index]
+                          .substring(appData.messages[index].indexOf('-') + 2);
+                      appData.resendMessage(message);
+                    },
                   );
                 },
               ),

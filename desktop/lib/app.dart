@@ -1,6 +1,9 @@
+import 'package:desktop/layout_image.dart';
+import 'package:desktop/layout_selection.dart';
 import 'package:flutter/material.dart';
 import 'layout_intro.dart';
 import 'layout_message.dart';
+import 'layout_login.dart';
 
 // Main application widget
 class App extends StatefulWidget {
@@ -21,7 +24,10 @@ class AppState extends State<App> {
       home: const LayoutIntro(),
       routes: {
         'intro': (context) => const LayoutIntro(),
+        'login': (context) => const LayoutLogin(),
+        'selection': (context) => const LayoutSelection(),
         'message': (context) => const LayoutMessage(),
+        'image': (context) => const LayoutImage(),
       },
     );
   }

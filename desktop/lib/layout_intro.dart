@@ -43,7 +43,7 @@ class LayoutIntroState extends State<LayoutIntro> {
   }
 
   void connectionPopup(BuildContext context) {
-    AppData appData = Provider.of<AppData>(context);
+    AppData appData = Provider.of<AppData>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -78,7 +78,7 @@ class LayoutIntroState extends State<LayoutIntro> {
 
                         Future.delayed(const Duration(seconds: 2), () {
                           Navigator.of(context).pop();
-                          Navigator.of(context).pushNamed('message');
+                          Navigator.of(context).pushNamed('login');
                           if (appData.connectionStatus ==
                               ConnectionStatus.connected) {
                             appData.onConnectionComplete(context);

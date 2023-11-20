@@ -15,6 +15,7 @@ enum ConnectionStatus {
 class AppData extends ChangeNotifier {
   IOWebSocketChannel? socketClient;
   List<String> messages = [];
+  List<String> imagesBase64 = [];
   TextEditingController messageController = TextEditingController();
   ConnectionStatus connectionStatus = ConnectionStatus.disconnected;
 
@@ -26,10 +27,13 @@ class AppData extends ChangeNotifier {
     try {
       socketClient = IOWebSocketChannel.connect("ws://$ip:$port");
       connectionStatus = ConnectionStatus.connected;
-      print("connectToServer connected");
+      Map<String, dynamic> jsonMessage = {
+        'platform': 'desktop',
+      };
+      String encodedMessage = jsonEncode(jsonMessage);
+      socketClient!.sink.add(encodedMessage);
     } catch (e) {
       connectionStatus = ConnectionStatus.disconnected;
-      print("connectToServer disconnected:" + e.toString());
     }
     notifyListeners();
   }
@@ -38,28 +42,114 @@ class AppData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void sendMessage(String messageText) {
-    print(socketClient);
+  void sendMessage(String trim) {
+    String messageText = messageController.text.trim();
     if (messageText.isNotEmpty && socketClient != null) {
-      broadcastMessage(messageText);
+      Map<String, dynamic> jsonMessage = {
+        'message': messageText,
+      };
+      String encodedMessage = jsonEncode(jsonMessage);
+      socketClient!.sink.add(encodedMessage);
+
+      bool messageExists = messages.contains(messageText);
+
+      if (messageExists) {
+        messages.removeWhere((msg) => msg == messageText);
+      }
+
       String currentDate =
           DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
-      String formattedMessage = '$messageText - $currentDate';
-      messages.add(formattedMessage);
-      messages.sort((a, b) => b.compareTo(a));
+      String formattedMessage = '$currentDate - $messageText';
+
+      messages.insert(0, formattedMessage);
+      messages.sort((a, b) {
+        DateTime dateA = DateFormat('dd/MM/yyyy HH:mm:ss')
+            .parse(a.substring(0, a.lastIndexOf('-')).trim());
+        DateTime dateB = DateFormat('dd/MM/yyyy HH:mm:ss')
+            .parse(b.substring(0, b.lastIndexOf('-')).trim());
+        return dateB.compareTo(dateA);
+      });
       messageController.clear();
       saveListToFile();
       notifyListeners();
-      print(messages); //remove after check
     }
   }
 
-  void broadcastMessage(String msg) {
-    final message = {
-      'type': 'broadcast',
-      'value': msg,
+  void resendMessage(String message) {
+    if (socketClient != null) {
+      Map<String, dynamic> jsonMessage = {
+        'msgPlatform': 'desktop',
+        'message': message,
+      };
+      String encodedMessage = jsonEncode(jsonMessage);
+      socketClient!.sink.add(encodedMessage);
+    }
+  }
+
+  void sendImage(File imageFile) async {
+    try {
+      List<String> imageGallery = imagesBase64 ?? [];
+
+      List<int> imageBytes = await imageFile.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
+
+      imageGallery.add(base64Image);
+
+      imagesBase64 = imageGallery;
+
+      saveImageGalleryToFile();
+      notifyListeners();
+    } catch (e) {
+      print('Error sending image: $e');
+    }
+  }
+
+  void resendImage(String base64Image) {
+    Map<String, dynamic> jsonMessage = {
+      'platform': 'desktop',
+      'image': base64Image,
     };
-    socketClient!.sink.add(jsonEncode(message));
+
+    String encodedMessage = jsonEncode(jsonMessage);
+    socketClient?.sink.add(encodedMessage);
+    notifyListeners();
+  }
+
+  Future<String> checkLogin(
+      String username, String password, BuildContext context) async {
+    String result = "invalid";
+    Map<String, dynamic> loginData = {
+      'userPlatform': 'desktop',
+      'user': username,
+      'password': password,
+    };
+
+    String encodedLoginData = jsonEncode(loginData);
+    socketClient!.sink.add(encodedLoginData);
+
+    try {
+      socketClient!.stream.listen(
+        (message) {
+          final data = jsonDecode(message);
+          Navigator.pop(context);
+          switch (data['validacion']) {
+            case 'correcto':
+              result = "valid";
+              break;
+            case 'incorrecto':
+              result = "invalid";
+              break;
+            default:
+              result = "invalid";
+              break;
+          }
+        },
+      );
+      return result;
+    } catch (e) {
+      Navigator.pop(context);
+      return "invalid";
+    }
   }
 
   void downloadList() async {
@@ -97,5 +187,35 @@ class AppData extends ChangeNotifier {
     } catch (e) {
       print('Error saving list to file: $e');
     }
+  }
+
+  void saveImageGalleryToFile() async {
+    try {
+      Directory documentsDirectory = await getApplicationDocumentsDirectory();
+      String filePath = '${documentsDirectory.path}/image_gallery.json';
+      File file = File(filePath);
+      await file.writeAsString(jsonEncode(imagesBase64));
+    } catch (e) {
+      print('Error saving image gallery to file: $e');
+    }
+  }
+
+  void loadImageGallery() async {
+    try {
+      Directory documentsDirectory = await getApplicationDocumentsDirectory();
+      String filePath = '${documentsDirectory.path}/image_gallery.json';
+      File file = File(filePath);
+      if (file.existsSync()) {
+        String fileContent = await file.readAsString();
+        imagesBase64 = List<String>.from(jsonDecode(fileContent));
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error loading image gallery from file: $e');
+    }
+  }
+
+  List<String> getImageGallery() {
+    return imagesBase64;
   }
 }
