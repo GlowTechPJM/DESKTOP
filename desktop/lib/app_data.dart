@@ -95,13 +95,12 @@ class AppData extends ChangeNotifier {
       String base64Image = base64Encode(imageBytes);
       Map<String, dynamic> jsonImage = {
         'imgPlatform': 'desktop',
-        'imagen': base64Image,
+        'image': base64Image,
       };
-      print(jsonImage);
-      print(socketClient);
+      print('Sending image: $jsonImage');
       socketClient!.sink.add(jsonImage);
-      imageGallery.add(base64Image);
 
+      imageGallery.add(base64Image);
       imagesBase64 = imageGallery;
 
       saveImageGalleryToFile();

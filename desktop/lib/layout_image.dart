@@ -19,7 +19,6 @@ class LayoutImageState extends State<LayoutImage> {
   @override
   void initState() {
     super.initState();
-    // Load the saved image gallery
   }
 
   Future<void> pickImage() async {
