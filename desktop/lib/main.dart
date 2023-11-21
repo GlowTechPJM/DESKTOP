@@ -5,6 +5,7 @@ import 'package:window_manager/window_manager.dart';
 import 'app_data.dart';
 import 'app.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   // For Linux, macOS and Windows, initialize WindowManager
   try {

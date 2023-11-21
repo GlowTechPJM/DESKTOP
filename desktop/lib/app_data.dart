@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class AppData extends ChangeNotifier {
       };
       String encodedMessage = jsonEncode(jsonMessage);
       socketClient!.sink.add(encodedMessage);
+      print(socketClient);
     } catch (e) {
       connectionStatus = ConnectionStatus.disconnected;
     }
@@ -51,7 +53,7 @@ class AppData extends ChangeNotifier {
       };
       String encodedMessage = jsonEncode(jsonMessage);
       socketClient!.sink.add(encodedMessage);
-
+      print(socketClient);
       bool messageExists = messages.contains(messageText);
 
       if (messageExists) {
@@ -89,21 +91,18 @@ class AppData extends ChangeNotifier {
 
   void sendImage(File imageFile) async {
     try {
-      List<String> imageGallery = imagesBase64 ?? [];
-
       List<int> imageBytes = await imageFile.readAsBytes();
       String base64Image = base64Encode(imageBytes);
-      Map<String, dynamic> jsonImage = {
+      Map<String, String> jsonImage = {
         'imgPlatform': 'desktop',
-        'image': base64Image,
+        'imagen': base64Image,
       };
-      print('Sending image: $jsonImage');
-      socketClient!.sink.add(jsonImage);
+      socketClient!.sink.add(jsonEncode(jsonImage));
 
-      imageGallery.add(base64Image);
-      imagesBase64 = imageGallery;
+      imagesBase64.add(base64Image);
 
       saveImageGalleryToFile();
+
       notifyListeners();
     } catch (e) {
       print('Error sending image: $e');
@@ -223,5 +222,54 @@ class AppData extends ChangeNotifier {
 
   List<String> getImageGallery() {
     return imagesBase64;
+  }
+
+  Future<void> sendConnectedMessage(BuildContext context) async {
+    try {
+      Map<String, dynamic> jsonMessage = {
+        'key': 'connected',
+        'value': 'connected',
+      };
+      socketClient?.sink.add(jsonEncode(jsonMessage));
+      socketClient?.stream.listen(
+        (message) {
+          final data = jsonDecode(message);
+          if (data.containsKey('connected')) {
+            showConnectedClientsPopup(context, data['connected']);
+          }
+        },
+      );
+    } catch (e) {
+      print('Error sending "connected" message: $e');
+    }
+  }
+
+  void showConnectedClientsPopup(
+      BuildContext context, List<dynamic> connectedClients) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Connected Clients Information'),
+          content: Column(
+            children: [
+              for (var clientInfo in connectedClients)
+                ListTile(
+                  title: Text(clientInfo['name']),
+                  subtitle: Text(clientInfo['status']),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

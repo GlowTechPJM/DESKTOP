@@ -1,4 +1,6 @@
+import 'package:desktop/app_data.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LayoutSelection extends StatefulWidget {
   const LayoutSelection({Key? key}) : super(key: key);
@@ -10,11 +12,23 @@ class LayoutSelection extends StatefulWidget {
 class LayoutSelectionState extends State<LayoutSelection> {
   @override
   Widget build(BuildContext context) {
+    AppData appData = Provider.of<AppData>(context);
     double buttonSize = MediaQuery.of(context).size.width * 0.2;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Selection Screen'),
+        actions: [
+          ElevatedButton(
+            onPressed: () async {
+              await appData.sendConnectedMessage(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+            ),
+            child: const Text('Get Connected Clients'),
+          ),
+        ],
       ),
       body: Center(
         child: Row(

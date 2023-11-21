@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:desktop/app_data.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -45,6 +44,17 @@ class LayoutImageState extends State<LayoutImage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Send Images'),
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                await appData.sendConnectedMessage(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+              ),
+              child: const Text('Get Connected Clients'),
+            ),
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),

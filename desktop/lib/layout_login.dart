@@ -19,6 +19,17 @@ class LayoutLoginState extends State<LayoutLogin> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
+        actions: [
+          ElevatedButton(
+            onPressed: () async {
+              await appData.sendConnectedMessage(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+            ),
+            child: const Text('Get Connected Clients'),
+          ),
+        ],
       ),
       body: Center(
         child: Padding(
@@ -29,7 +40,7 @@ class LayoutLoginState extends State<LayoutLogin> {
               SizedBox(
                 width: 300,
                 child: TextField(
-                  controller: usernameController, // Use the provided controller
+                  controller: usernameController,
                   decoration: const InputDecoration(
                     labelText: 'Username',
                   ),
@@ -39,8 +50,8 @@ class LayoutLoginState extends State<LayoutLogin> {
               SizedBox(
                 width: 300,
                 child: TextField(
-                  controller: passwordController, // Use the provided controller
-                  obscureText: false,
+                  controller: passwordController,
+                  obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Password',
                   ),

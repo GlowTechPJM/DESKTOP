@@ -23,6 +23,17 @@ class LayoutMessageState extends State<LayoutMessage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Message Sending'),
+        actions: [
+          ElevatedButton(
+            onPressed: () async {
+              await appData.sendConnectedMessage(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+            ),
+            child: const Text('Get Connected Clients'),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

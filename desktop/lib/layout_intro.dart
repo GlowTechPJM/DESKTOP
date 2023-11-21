@@ -15,6 +15,7 @@ class LayoutIntroState extends State<LayoutIntro> {
 
   @override
   Widget build(BuildContext context) {
+    AppData appData = Provider.of<AppData>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Led panel connection')),
