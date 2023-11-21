@@ -15,15 +15,11 @@ class LayoutImage extends StatefulWidget {
 
 class LayoutImageState extends State<LayoutImage> {
   File? selectedImage;
-  AppData appData; // Add reference to AppData
-
-  LayoutImageState() : appData = AppData();
 
   @override
   void initState() {
     super.initState();
     // Load the saved image gallery
-    appData.loadImageGallery();
   }
 
   Future<void> pickImage() async {
@@ -42,6 +38,7 @@ class LayoutImageState extends State<LayoutImage> {
 
   @override
   Widget build(BuildContext context) {
+    AppData appData = Provider.of<AppData>(context);
     bool isSendButtonEnabled = selectedImage != null;
 
     return ChangeNotifierProvider.value(
@@ -78,8 +75,6 @@ class LayoutImageState extends State<LayoutImage> {
                     ElevatedButton(
                       onPressed: isSendButtonEnabled
                           ? () {
-                              AppData appData =
-                                  Provider.of<AppData>(context, listen: false);
                               appData.sendImage(selectedImage!);
                             }
                           : null,

@@ -46,6 +46,7 @@ class AppData extends ChangeNotifier {
     String messageText = messageController.text.trim();
     if (messageText.isNotEmpty && socketClient != null) {
       Map<String, dynamic> jsonMessage = {
+        'msgPlatform': 'desktop',
         'message': messageText,
       };
       String encodedMessage = jsonEncode(jsonMessage);
@@ -92,7 +93,13 @@ class AppData extends ChangeNotifier {
 
       List<int> imageBytes = await imageFile.readAsBytes();
       String base64Image = base64Encode(imageBytes);
-
+      Map<String, dynamic> jsonImage = {
+        'imgPlatform': 'desktop',
+        'imagen': base64Image,
+      };
+      print(jsonImage);
+      print(socketClient);
+      socketClient!.sink.add(jsonImage);
       imageGallery.add(base64Image);
 
       imagesBase64 = imageGallery;
@@ -106,8 +113,8 @@ class AppData extends ChangeNotifier {
 
   void resendImage(String base64Image) {
     Map<String, dynamic> jsonMessage = {
-      'platform': 'desktop',
-      'image': base64Image,
+      'imgPlatform': 'desktop',
+      'imagen': base64Image,
     };
 
     String encodedMessage = jsonEncode(jsonMessage);
