@@ -22,7 +22,7 @@ class LayoutMessageState extends State<LayoutMessage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Message Sending'),
+        title: const Text('Text Sending'),
         actions: [
           ElevatedButton(
             onPressed: () async {

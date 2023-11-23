@@ -43,7 +43,7 @@ class LayoutImageState extends State<LayoutImage> {
       value: appData,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Send Images'),
+          title: const Text('Image Sending'),
           actions: [
             ElevatedButton(
               onPressed: () async {
