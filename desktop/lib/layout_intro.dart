@@ -78,12 +78,12 @@ class LayoutIntroState extends State<LayoutIntro> {
                         appData.connectToServer(ipController.text, 8080);
 
                         Future.delayed(const Duration(seconds: 2), () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pushNamed('login');
                           if (appData.connectionStatus ==
                               ConnectionStatus.connected) {
                             appData.onConnectionComplete(context);
-                          } else {
+                            Navigator.of(context).pushNamed('login');
+                          } else if (appData.connectionStatus ==
+                              ConnectionStatus.disconnected) {
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {

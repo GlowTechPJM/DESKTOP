@@ -24,7 +24,7 @@ class LayoutSelectionState extends State<LayoutSelection> {
               await appData.sendConnectedMessage(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
+              backgroundColor: Colors.orange,
             ),
             child: const Text('Get Connected Clients'),
           ),

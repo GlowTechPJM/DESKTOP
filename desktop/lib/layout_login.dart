@@ -25,7 +25,7 @@ class LayoutLoginState extends State<LayoutLogin> {
               await appData.sendConnectedMessage(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
+              backgroundColor: Colors.orange,
             ),
             child: const Text('Get Connected Clients'),
           ),

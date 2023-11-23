@@ -29,7 +29,7 @@ class LayoutMessageState extends State<LayoutMessage> {
               await appData.sendConnectedMessage(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
+              backgroundColor: Colors.orange,
             ),
             child: const Text('Get Connected Clients'),
           ),
@@ -38,47 +38,36 @@ class LayoutMessageState extends State<LayoutMessage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextField(
-              controller: appData.messageController,
-              decoration: const InputDecoration(labelText: 'Enter Message'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                appData.sendMessage(appData.messageController.text.trim());
-              },
-              child: const Text('Send'),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: appData.messages.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(appData.messages[index]),
-                    onTap: () {
-                      String message = appData.messages[index]
-                          .substring(appData.messages[index].indexOf('-') + 2);
-                      appData.resendMessage(message);
-                    },
-                  );
-                },
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextField(
+                controller: appData.messageController,
+                decoration: const InputDecoration(labelText: 'Enter Message'),
               ),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: IconButton(
-                icon: const Icon(Icons.download_rounded),
+              const SizedBox(height: 16),
+              ElevatedButton(
                 onPressed: () {
-                  appData.downloadList();
+                  appData.sendMessage(appData.messageController.text.trim());
                 },
+                child: const Text('Send'),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: appData.messages.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(appData.messages[index]),
+                      onTap: () {
+                        String message = appData.messages[index].substring(
+                            appData.messages[index].indexOf('-') + 2);
+                        appData.resendMessage(message);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ]),
       ),
     );
   }

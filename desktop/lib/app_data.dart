@@ -23,17 +23,15 @@ class AppData extends ChangeNotifier {
   Future<void> connectToServer(String ip, int port) async {
     connectionStatus = ConnectionStatus.connecting;
 
-    await Future.delayed(const Duration(seconds: 2));
-
     try {
       socketClient = IOWebSocketChannel.connect("ws://$ip:$port");
-      connectionStatus = ConnectionStatus.connected;
+      await Future.delayed(const Duration(seconds: 2));
       Map<String, dynamic> jsonMessage = {
         'platform': 'desktop',
       };
       String encodedMessage = jsonEncode(jsonMessage);
       socketClient!.sink.add(encodedMessage);
-      print(socketClient);
+      connectionStatus = ConnectionStatus.connected;
     } catch (e) {
       connectionStatus = ConnectionStatus.disconnected;
     }
@@ -53,7 +51,6 @@ class AppData extends ChangeNotifier {
       };
       String encodedMessage = jsonEncode(jsonMessage);
       socketClient!.sink.add(encodedMessage);
-      print(socketClient);
       bool messageExists = messages.contains(messageText);
 
       if (messageExists) {
@@ -154,17 +151,6 @@ class AppData extends ChangeNotifier {
     } catch (e) {
       Navigator.pop(context);
       return "invalid";
-    }
-  }
-
-  void downloadList() async {
-    try {
-      Directory documentsDirectory = await getApplicationDocumentsDirectory();
-      String filePath = '${documentsDirectory.path}/message_list.json';
-      File file = File(filePath);
-      await file.writeAsString(jsonEncode(messages));
-    } catch (e) {
-      print('Error downloading list: $e');
     }
   }
 
