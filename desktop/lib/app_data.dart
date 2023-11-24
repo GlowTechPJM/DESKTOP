@@ -213,11 +213,11 @@ class AppData extends ChangeNotifier {
   Future<void> sendConnectedMessage(BuildContext context) async {
     try {
       Map<String, dynamic> jsonMessage = {
-        'key': 'connected',
-        'value': 'connected',
+        'cntPlatform': 'desktop',
+        'connected': '',
       };
-      socketClient?.sink.add(jsonEncode(jsonMessage));
-      socketClient?.stream.listen(
+      socketClient!.sink.add(jsonEncode(jsonMessage));
+      socketClient!.stream.listen(
         (message) {
           final data = jsonDecode(message);
           if (data.containsKey('connected')) {

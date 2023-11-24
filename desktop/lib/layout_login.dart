@@ -19,17 +19,6 @@ class LayoutLoginState extends State<LayoutLogin> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
-        actions: [
-          ElevatedButton(
-            onPressed: () async {
-              await appData.sendConnectedMessage(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
-            child: const Text('Get Connected Clients'),
-          ),
-        ],
       ),
       body: Center(
         child: Padding(
