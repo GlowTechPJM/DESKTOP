@@ -56,8 +56,10 @@ class LayoutLoginState extends State<LayoutLogin> {
                     context,
                   );
                   if (result == "valid") {
+                    Navigator.of(context).pop();
                     Navigator.of(context).pushNamed('selection');
                   } else {
+                    Navigator.of(context).pop();
                     Navigator.of(context).pushNamed('intro');
                   }
                 },

@@ -15,7 +15,6 @@ class LayoutIntroState extends State<LayoutIntro> {
 
   @override
   Widget build(BuildContext context) {
-    AppData appData = Provider.of<AppData>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Led panel connection')),
@@ -75,7 +74,8 @@ class LayoutIntroState extends State<LayoutIntro> {
                     TextButton(
                       onPressed: () {
                         showLoadingScreen(context);
-                        appData.connectToServer(ipController.text, 8080);
+                        appData.connectToServer(
+                            ipController.text, 8080, context);
 
                         Future.delayed(const Duration(seconds: 2), () {
                           if (appData.connectionStatus ==

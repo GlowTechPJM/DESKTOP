@@ -19,8 +19,83 @@ class AppData extends ChangeNotifier {
   List<String> imagesBase64 = [];
   TextEditingController messageController = TextEditingController();
   ConnectionStatus connectionStatus = ConnectionStatus.disconnected;
+  String loginResult = "invalid";
 
-  Future<void> connectToServer(String ip, int port) async {
+  void onMessage(String message, BuildContext context) {
+    final data = jsonDecode(message);
+    print(data);
+
+    if (data.containsKey('android') && data.containsKey('desk')) {
+      showConnectedClientsPopup(context, data['android'], data['desk']);
+    } else if (data.containsKey('type') &&
+        data.containsKey('user') &&
+        data.containsKey('action')) {
+      String user = data['user'];
+      String action = data['action'];
+
+      switch (action) {
+        case 'connect':
+          showCustomToast(context, "$user has connected to the server.");
+          break;
+        case 'disconnect':
+          showCustomToast(context, "$user has disconnected from the server.");
+          break;
+        case 'message':
+          showCustomToast(context, "$user has sent a message.");
+          break;
+        default:
+          break;
+      }
+    } else if (data.containsKey('validacion')) {
+      Navigator.pop(context);
+      switch (data['validacion']) {
+        case 'correcto':
+          loginResult = "valid";
+          break;
+        case 'incorrecto':
+          loginResult = "invalid";
+          break;
+        default:
+          loginResult = "invalid";
+          break;
+      }
+    } else {
+      print('Received message: $message');
+    }
+  }
+
+  void showCustomToast(BuildContext context, String message) {
+    final overlay = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 16.0,
+        right: 16.0,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context)?.insert(overlay);
+
+    Future.delayed(const Duration(seconds: 2), () {
+      overlay.remove();
+    });
+  }
+
+  Future<void> connectToServer(
+      String ip, int port, BuildContext context) async {
     connectionStatus = ConnectionStatus.connecting;
 
     try {
@@ -31,6 +106,21 @@ class AppData extends ChangeNotifier {
       };
       String encodedMessage = jsonEncode(jsonMessage);
       socketClient!.sink.add(encodedMessage);
+
+      socketClient!.stream.listen(
+        (message) {
+          onMessage(message, context);
+        },
+        onDone: () {
+          connectionStatus = ConnectionStatus.disconnected;
+          notifyListeners();
+        },
+        onError: (error) {
+          connectionStatus = ConnectionStatus.disconnected;
+          notifyListeners();
+        },
+      );
+
       connectionStatus = ConnectionStatus.connected;
     } catch (e) {
       connectionStatus = ConnectionStatus.disconnected;
@@ -128,30 +218,8 @@ class AppData extends ChangeNotifier {
 
     String encodedLoginData = jsonEncode(loginData);
     socketClient!.sink.add(encodedLoginData);
-
-    try {
-      socketClient!.stream.listen(
-        (message) {
-          final data = jsonDecode(message);
-          Navigator.pop(context);
-          switch (data['validacion']) {
-            case 'correcto':
-              result = "valid";
-              break;
-            case 'incorrecto':
-              result = "invalid";
-              break;
-            default:
-              result = "invalid";
-              break;
-          }
-        },
-      );
-      return result;
-    } catch (e) {
-      Navigator.pop(context);
-      return "invalid";
-    }
+    await Future.delayed(const Duration(seconds: 2));
+    return loginResult;
   }
 
   void loadList() async {
@@ -217,34 +285,54 @@ class AppData extends ChangeNotifier {
         'connected': '',
       };
       socketClient!.sink.add(jsonEncode(jsonMessage));
-      socketClient!.stream.listen(
-        (message) {
-          final data = jsonDecode(message);
-          if (data.containsKey('connected')) {
-            showConnectedClientsPopup(context, data['connected']);
-          }
-        },
-      );
     } catch (e) {
       print('Error sending "connected" message: $e');
     }
   }
 
   void showConnectedClientsPopup(
-      BuildContext context, List<dynamic> connectedClients) {
+    BuildContext context,
+    String androidUsers,
+    String desktopUsers,
+  ) {
+    List<String> androidIds = androidUsers.split(';');
+    List<String> desktopIds = desktopUsers.split(';');
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Connected Clients Information'),
-          content: Column(
-            children: [
-              for (var clientInfo in connectedClients)
-                ListTile(
-                  title: Text(clientInfo['name']),
-                  subtitle: Text(clientInfo['status']),
+          content: SingleChildScrollView(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Android Users:',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline),
+                    ),
+                    for (var androidId in androidIds) Text(androidId),
+                  ],
                 ),
-            ],
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Desktop Users:',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline),
+                    ),
+                    for (var desktopId in desktopIds) Text(desktopId),
+                  ],
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(

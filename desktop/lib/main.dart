@@ -18,7 +18,7 @@ void main() async {
     print(e);
   }
 
-  // Define the app as a ChangeNotifierProvider
+  // Defineix l'aplicació com un ChangeNotifierProvider
   runApp(
     ChangeNotifierProvider(
       create: (context) => AppData(),
@@ -27,7 +27,7 @@ void main() async {
   );
 }
 
-// Show the window when it's ready
+// Mostra la finestra quan estigui preparada
 void showWindow(_) async {
   windowManager.setMinimumSize(const Size(300.0, 600.0));
   await windowManager.setTitle('App');
