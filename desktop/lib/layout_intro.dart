@@ -81,6 +81,7 @@ class LayoutIntroState extends State<LayoutIntro> {
                           if (appData.connectionStatus ==
                               ConnectionStatus.connected) {
                             appData.onConnectionComplete(context);
+                            Navigator.of(context).pop();
                             Navigator.of(context).pushNamed('login');
                           } else if (appData.connectionStatus ==
                               ConnectionStatus.disconnected) {
